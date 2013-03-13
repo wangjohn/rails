@@ -88,6 +88,15 @@ module Rails
         Rails.config
       end
 
+      # Send the this method to the global set of rake tasks for the main Rails
+      # app. Rake tasks are shared across applications should they should be
+      # kept in the +@rake_tasks+ instance variable in the +Rails+ module.
+      # To do this, we send any +rake_tasks+ that are obtained from configuring
+      # a particular app up to the +Rails.rake_tasks+ method.
+      def rake_tasks(&block)
+        Rails.rake_tasks(&block)
+      end
+
       # Makes the +new+ method public.
       #
       # Note that Rails::Application inherits from Rails::Engine, which 
@@ -102,8 +111,15 @@ module Rails
 
     delegate :default_url_options, :default_url_options=, to: :routes
 
-    def initialize
+    def initialize(&block)
       super
+
+      @initialized      = false
+      @reloaders        = []
+      @routes_reloader  = nil
+      @env_config       = nil
+      @ordered_railties = nil
+      @railties         = nil
 
       # If +Rails.application+ is already defined then the base configuration
       # of the new application will be the global +Rails.config+ that was
@@ -124,14 +140,7 @@ module Rails
         add_lib_to_load_path!
       end
 
-      yield config if block_given?
-
-      @initialized      = false
-      @reloaders        = []
-      @routes_reloader  = nil
-      @env_config       = nil
-      @ordered_railties = nil
-      @railties         = nil
+      class_eval(&block)
     end
 
     # Returns true if the application is initialized.
@@ -150,7 +159,6 @@ module Rails
     def reload_routes!
       routes_reloader.reload!
     end
-
 
     # Return the application's KeyGenerator
     def key_generator
