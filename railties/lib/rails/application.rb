@@ -79,6 +79,15 @@ module Rails
         Rails.application
       end
 
+      # Returns the rails global application configuration in +Rails.config+.
+      #
+      # This overrides the delegation of config to the application instance
+      # which is defined in the Rails::Railtie superclass (in the +delegate+
+      # method).
+      def config
+        Rails.config
+      end
+
       # Makes the +new+ method public.
       #
       # Note that Rails::Application inherits from Rails::Engine, which 
@@ -263,7 +272,7 @@ module Rails
     end
 
     def config #:nodoc:
-      @config ||= Rails.config
+      Rails.config
     end
 
     def to_app #:nodoc:
