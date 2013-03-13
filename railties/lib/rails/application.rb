@@ -63,6 +63,22 @@ module Rails
         super
       end
 
+      # Redirects all calls of the application instance to the canonical
+      # +Rails.application+ instance which is created on startup of the 
+      # main app.
+      #
+      # This overrides the +instance+ method in Rails::Railties. The original
+      # +instance+ method created a new application if there wasn't one already
+      # cached.
+      #
+      # However, since +Rails.application+ is already defined once the app is
+      # initialized, we set it as the default application instance to use.
+      # Also, we don't want to cache this result in case +Rails.application+
+      # changes.
+      def instance
+        Rails.application
+      end
+
       # Makes the +new+ method public.
       #
       # Note that Rails::Application inherits from Rails::Engine, which 
