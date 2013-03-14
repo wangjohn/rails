@@ -47,6 +47,9 @@ module Rails
       @config ||= application.config
     end
 
+    # The @config variable is set on the first instantiation of a
+    # Rails::Application object. This configuration then becomes the global
+    # configuration to be used for all applications.
     def config=(configuration)
       @config = configuration
     end

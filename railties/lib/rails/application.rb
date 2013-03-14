@@ -88,11 +88,15 @@ module Rails
         Rails.config
       end
 
-      # Send the this method to the global set of rake tasks for the main Rails
-      # app. Rake tasks are shared across applications should they should be
-      # kept in the +@rake_tasks+ instance variable in the +Rails+ module.
+      # Send this call to the global set of rake tasks for the main Rails
+      # app. Rake tasks are shared across applications and so they should be
+      # kept in the +@rake_tasks+ variable in the +Rails+ module.
+      #
       # To do this, we send any +rake_tasks+ that are obtained from configuring
       # a particular app up to the +Rails.rake_tasks+ method.
+      #
+      # This method overwrites the rake_tasks in the Rails::Railtie superclass
+      # so that the rake tasks are kept in the Rails module.
       def rake_tasks(&block)
         Rails.rake_tasks(&block)
       end
@@ -140,7 +144,7 @@ module Rails
         add_lib_to_load_path!
       end
 
-      class_eval(&block)
+      instance_eval(&block)
     end
 
     # Returns true if the application is initialized.
@@ -279,8 +283,28 @@ module Rails
       Finisher.initializers_for(self)
     end
 
-    def config #:nodoc:
+    # Returns the rails global application configuration in +Rails.config+.
+    #
+    # When configuring an application, you will actually be configuring the
+    # global configuration inside of the Rails module.
+    def config
       Rails.config
+    end
+
+    # Sends rake tasks to the class method. The class method overwrites the
+    # Rails::Railtie definition of +rake_tasks+ and sends the rake tasks
+    # up the the Rails module. This prevents any particular application from
+    # storing their own rake tasks and makes sure that the rake tasks are
+    # global.
+    def rake_tasks(&block)
+      self.class.rake_tasks(&block)
+    end
+
+    # Sends the initializers to the +initializer+ method defined in the
+    # Rails::Initializable module. Each Rails::Application class has its own
+    # set of initializers, as defined by the Initializable module.
+    def initializer(name, opts={}, &block)
+      self.class.initializer(name, opts, &block)
     end
 
     def to_app #:nodoc:
