@@ -125,21 +125,12 @@ module Rails
       @ordered_railties = nil
       @railties         = nil
 
-      # If +Rails.application+ is already defined then the base configuration
-      # of the new application will be the global +Rails.config+ that was
-      # defined by the first application.
-      #
-      # If +Rails.application+ is not defined, we set the global rails config
-      # for all following applications (unless +Rails.config+ is reset to
-      # something else). This is also when we run the :before_configuration
-      # hooks and when we add lib to the load path of the application.
-      if Rails.application
-        @config = Rails.config
-      else
-        ActiveSupport.run_load_hooks(:before_configuration, self)
-        @config = Application::Configuration.new(find_root_with_flag("config.ru", Dir.pwd))
+      # Get the global rails configuration.
+      # TODO: Explain this more.
+      @config = Rails.config
 
-        Rails.config = @config
+      unless Rails.application
+        ActiveSupport.run_load_hooks(:before_configuration, self)
         Rails.application = self
         add_lib_to_load_path!
       end
