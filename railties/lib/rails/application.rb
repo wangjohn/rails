@@ -101,6 +101,25 @@ module Rails
         Rails.rake_tasks(&block)
       end
 
+      # This is for backwards compatibility, so that one can still defined a
+      # subclass of Rails.application and initialize on that class. For example:
+      #
+      #   class MyApp < Rails::Application
+      #   end
+      #   MyApp.initialize!
+      #
+      # The preferred method for initializing an application, however, is to
+      # call +MyApp.new+, however.
+      def initialize!
+        if Rails.application
+          raise "You have already initializated a Rails::Application. You may only call the initialize! method once. Use Rails::Application.new to create a new application instead."
+        else
+          app = new
+          Rails.application = app
+          app.initialize!
+        end
+      end
+
       # Makes the +new+ method public.
       #
       # Note that Rails::Application inherits from Rails::Engine, which 
@@ -168,6 +187,12 @@ module Rails
       end
 
       instance_eval(&block) if block_given?
+    end
+
+    # Sends any runner called in the +instance_eval+ of a new application up
+    # to the +runner+ method defined in Rails::Railtie.
+    def runner(&blk)
+      self.class.runner(&blk)
     end
 
     # Returns true if the application is initialized.
