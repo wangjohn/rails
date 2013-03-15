@@ -125,17 +125,49 @@ module Rails
       @ordered_railties = nil
       @railties         = nil
 
-      # Get the global rails configuration.
-      # TODO: Explain this more.
-      @config = Rails.config
+      # If a block is provided and there is not already +Rails.application+
+      # defined, then we overwrite the previous global rails config file
+      # with a new configuration what will be configured by the block provided.
+      #
+      # Otherwise we use the global config that is already defined. This is
+      # mostly for backwards compatibility. For example, this means we can 
+      # still support the old way of defining applications in the
+      # config/application.rb file like so:
+      #
+      #   class Application < Rails::Application
+      #     config.time_zone = 'Eastern Time (US & Canada)'
+      #   end
+      #   Application.new
+      #
+      # However, when a block is given in the new application, the
+      # configuration in the block will overwrite the configuration defined
+      # in the class. For example:
+      #
+      #   class Application < Rails::Application
+      #     config.time_zone = 'Eastern Time (US & Canada)'
+      #   end
+      #   Application.new do
+      #     config.time_zone = 'Pacific Time (US & Canada)'
+      #   end
+      #
+      # In the above, the resulting time zone would be given by
+      # config.time_zone = 'Pacfic Time (US & Canada)' and the configuration
+      # defined in the class would be completed erased.
+      if block_given? && !Rails.application
+        @config = Application::Configuration.new(self.class.find_root_with_flag("config.ru", Dir.pwd))
+        Rails.config = @config
+      else
+        @config = Rails.config
+      end
 
+      # Run the load hooks and set the main Rails app if there isn't already
+      # a +Rails.application+ defined.
       unless Rails.application
         ActiveSupport.run_load_hooks(:before_configuration, self)
         Rails.application = self
-        add_lib_to_load_path!
       end
 
-      instance_eval(&block)
+      instance_eval(&block) if block_given?
     end
 
     # Returns true if the application is initialized.
