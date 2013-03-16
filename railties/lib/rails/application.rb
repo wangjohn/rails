@@ -101,6 +101,10 @@ module Rails
         Rails.rake_tasks(&block)
       end
 
+      def paths
+        Rails.config.paths
+      end
+
       # This is for backwards compatibility, so that one can still defined a
       # subclass of Rails.application and initialize on that class. For example:
       #
@@ -194,6 +198,11 @@ module Rails
     # to the +runner+ method defined in Rails::Railtie.
     def runner(&blk)
       self.class.runner(&blk)
+    end
+
+    # Sends the isolate namespace method up to the class method.
+    def isolate_namespace(mod)
+      self.class.isolate_namespace(mod)
     end
 
     # Returns true if the application is initialized.
