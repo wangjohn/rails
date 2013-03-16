@@ -184,6 +184,7 @@ module Rails
       unless Rails.application
         ActiveSupport.run_load_hooks(:before_configuration, self)
         Rails.application = self
+        add_lib_to_load_path!
       end
 
       instance_eval(&block) if block_given?
