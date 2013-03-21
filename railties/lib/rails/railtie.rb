@@ -195,7 +195,7 @@ module Rails
 
     delegate :railtie_name, to: :class
 
-    def initialize
+    def initialize(configuration = nil)
       if self.class == Rails::Railtie
         raise "#{self.class.name} is abstract, you cannot instantiate it directly."
       end

@@ -425,11 +425,11 @@ module Rails
     delegate :middleware, :root, :paths, to: :config
     delegate :engine_name, :isolated?, to: :class
 
-    def initialize
+    def initialize(configuration = nil)
       @_all_autoload_paths = nil
       @_all_load_paths     = nil
       @app                 = nil
-      @config              = nil
+      @config              = configuration
       @env_config          = nil
       @helpers             = nil
       @routes              = nil
