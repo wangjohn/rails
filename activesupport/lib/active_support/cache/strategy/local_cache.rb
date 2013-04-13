@@ -68,10 +68,26 @@ module ActiveSupport
           end
 
           def call(env)
-            Thread.current[thread_local_key] = LocalStore.new
+            LocalCacheRegistry.instance.set_cache_for(thread_local_key, LocalStore.new)
             @app.call(env)
           ensure
-            Thread.current[thread_local_key] = nil
+            LocalCacheRegistry.instance.set_cache_for(thread_local_key, nil)
+          end
+        end
+
+        class LocalCacheRegistry
+          extend ActiveSupport::PerThreadRegistry
+
+          def initialize
+            @cache_registry = {}
+          end
+
+          def cache_for(thread_local_key)
+            @cache_registry[thread_local_key]
+          end
+
+          def set_cache_for(thread_local_key, cache)
+            @cache_registry[thread_local_key] = cache
           end
         end
 
@@ -151,7 +167,7 @@ module ActiveSupport
           end
 
           def local_cache
-            Thread.current[thread_local_key]
+            LocalCacheRegistry.instance.cache_for(thread_local_key)
           end
 
           def bypass_local_cache
