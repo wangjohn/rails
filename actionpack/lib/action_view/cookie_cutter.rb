@@ -10,21 +10,37 @@ module ActionView
       @_abstract_cookie_cutter.render_and_match(&block)
     end
 
-    def match(method_name, options = {})
-      @_abstract_cookie_cutter.match(method_name, options = {})
+    def render(options = {}, &block)
+      if options[:partial]
+        @_abstract_cookie_cutter.render_partial(options, self)
+      else
+        @_abstract_cookie_cutter.render_matches(options, &block)
+      end
     end
 
-    def attach_partial(path)
-      @_abstract_cookie_cutter.attach_partial(path)
-    end
+    protected
+
+      def match(method_name, options = {})
+        @_abstract_cookie_cutter.match(method_name, options = {})
+      end
+
+      def attach_partial(name, path)
+        @_abstract_cookie_cutter.attach_partial(name, path)
+      end
   end
 
   class AbstractCookieCutter
     def initialize
       @matches = {}
+      @partials = {}
     end
 
-    def render_and_match(&block)
+    def render_partial(partial_name, object)
+      path = @partials[partial_name]
+      render(partial: path, object: object)
+    end
+
+    def render_matches(&block)
       text = block_to_text(block)
       @matches.each do |method_name, options|
         result = public_send(method_name)
@@ -42,8 +58,8 @@ module ActionView
       @matches[method_name] = options
     end
 
-    def attach_partial(path)
-      raise "Not implemented"
+    def attach_partial(name, path)
+      @partials[name] = path
     end
   end
 end
