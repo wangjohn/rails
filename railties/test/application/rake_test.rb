@@ -151,6 +151,11 @@ module ApplicationTests
       assert_equal "Prefix Verb URI Pattern     Controller#Action\ncart GET /cart(.:format) cart#show\n", output
     end
 
+    def test_rake_routes_controller_deprecation_message
+      output = Dir.chdir(app_path) { `CONTROLLER=basketball rake routes` }
+      asset_match(/DEPRECATION WARNING:/, output)
+    end
+
     def test_rake_routes_displays_message_when_no_routes_are_defined
       app_file "config/routes.rb", <<-RUBY
         AppTemplate::Application.routes.draw do

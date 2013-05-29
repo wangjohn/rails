@@ -87,10 +87,8 @@ module ActionDispatch
         @routes = routes
       end
 
-      def format(formatter, filter = nil)
-        routes_to_display = filter_routes(filter)
-
-        routes = collect_routes(routes_to_display)
+      def format(formatter)
+        routes = collect_routes(@routes)
 
         if routes.none?
           formatter.no_routes
@@ -109,14 +107,6 @@ module ActionDispatch
       end
 
       private
-
-      def filter_routes(filter)
-        if filter
-          @routes.select { |route| route.defaults[:controller] == filter }
-        else
-          @routes
-        end
-      end
 
       def collect_routes(routes)
         routes.collect do |route|
