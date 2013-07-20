@@ -111,9 +111,7 @@ module ActiveRecord
 
     initializer "active_record.set_configs" do |app|
       ActiveSupport.on_load(:active_record) do
-        app.config.active_record.each do |k,v|
-          send "#{k}=", v
-        end
+        ActiveRecord::ApplicationModel.config = ActiveRecord::ApplicationModel::ModelConfiguration.new(app.config.active_record)
       end
     end
 
