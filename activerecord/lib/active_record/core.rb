@@ -13,7 +13,7 @@ module ActiveRecord
       # Accepts a logger conforming to the interface of Log4r which is then
       # passed on to any new database connections made and which can be
       # retrieved on both a class and instance level by calling +logger+.
-      mattr_accessor :logger, instance_writer: false
+      delegate :logger, to: ActiveRecord::ApplicationModel.config
 
       ##
       # :singleton-method:
@@ -42,14 +42,14 @@ module ActiveRecord
       #         'database' => 'db/production.sqlite3'
       #      }
       #   }
-      mattr_accessor :configurations, instance_writer: false
+      delegate :configurations, to: ActiveRecord::ApplicationModel.config
       self.configurations = {}
 
       ##
       # :singleton-method:
       # Determines whether to use Time.utc (using :utc) or Time.local (using :local) when pulling
       # dates and times from the database. This is set to :utc by default.
-      mattr_accessor :default_timezone, instance_writer: false
+      delegate :default_timezone, to: ActiveRecord::ApplicationModel.config
       self.default_timezone = :utc
 
       ##
@@ -60,13 +60,13 @@ module ActiveRecord
       # ActiveRecord::Schema file which can be loaded into any database that
       # supports migrations. Use :ruby if you want to have different database
       # adapters for, e.g., your development and test environments.
-      mattr_accessor :schema_format, instance_writer: false
+      delegate :schema_format, to: ActiveRecord::ApplicationModel.config
       self.schema_format = :ruby
 
       ##
       # :singleton-method:
       # Specify whether or not to use timestamps for migration versions
-      mattr_accessor :timestamped_migrations, instance_writer: false
+      delegate :timestamped_migrations, to: ActiveRecord::ApplicationModel.config
       self.timestamped_migrations = true
 
       def self.disable_implicit_join_references=(value)
@@ -74,7 +74,8 @@ module ActiveRecord
                                         "Make sure to remove this configuration because it does nothing.")
       end
 
-      class_attribute :default_connection_handler, instance_writer: false
+      class_attribute :default_connection_handler, instance_writer: false, proc: true
+      self.default_connection_handler = lambda { ActiveRecord::ApplicationModel.config.default_configuration_handler }
 
       def self.connection_handler
         ActiveRecord::RuntimeRegistry.connection_handler || default_connection_handler
