@@ -29,16 +29,22 @@ module ActiveRecord
 
         def create_defaults
           ActiveSupport::OrderedOptions.new(
-            logger:                   nil,
-            primary_key_prefix_type:  nil,
-            table_name_prefix:        "",
-            table_name_suffix:        "",
-            pluralize_table_names:    true,
-            default_timezone:         nil,
-            schema_format:            nil,
-            timestamped_migrations:   nil,
-            lock_optimistically:      nil,
-            cache_timestamp_format:   nil
+            logger:                                   nil,
+            primary_key_prefix_type:                  nil,
+            table_name_prefix:                        "",
+            table_name_suffix:                        "",
+            pluralize_table_names:                    true,
+            configurations:                           {},
+            default_timezone:                         :utc,
+            schema_format:                            :ruby,
+            timestamped_migrations:                   true,
+            default_connection_handler:               ConnectionAdapters::ConnectionHandler.new,
+            time_zone_aware_attributes:               false,
+            skip_time_zone_conversion_for_attributes: [],
+
+            #TODO: find out if we actually use these
+            lock_optimistically:                      nil,
+            cache_timestamp_format:                   nil
           )
         end
     end
