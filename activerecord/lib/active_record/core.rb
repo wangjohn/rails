@@ -13,7 +13,13 @@ module ActiveRecord
       # Accepts a logger conforming to the interface of Log4r which is then
       # passed on to any new database connections made and which can be
       # retrieved on both a class and instance level by calling +logger+.
-      delegate :logger, to: ActiveRecord::ApplicationModel.config
+      def self.logger
+        ActiveRecord::ApplicationModel.config.logger
+      end
+
+      def self.logger=(value)
+        ActiveRecord::ApplicationModel.config.logger = value
+      end
 
       ##
       # :singleton-method:
@@ -42,14 +48,26 @@ module ActiveRecord
       #         'database' => 'db/production.sqlite3'
       #      }
       #   }
-      delegate :configurations, to: ActiveRecord::ApplicationModel.config
+      def self.configurations
+        ActiveRecord::ApplicationModel.config.configurations
+      end
+
+      def self.configurations=(value)
+        ActiveRecord::ApplicationModel.config.configurations = value
+      end
       self.configurations = {}
 
       ##
       # :singleton-method:
       # Determines whether to use Time.utc (using :utc) or Time.local (using :local) when pulling
       # dates and times from the database. This is set to :utc by default.
-      delegate :default_timezone, to: ActiveRecord::ApplicationModel.config
+      def self.default_timezone
+        ActiveRecord::ApplicationModel.config.default_timezone
+      end
+
+      def self.default_timezone=(value)
+        ActiveRecord::ApplicationModel.config.default_timezone = value
+      end
       self.default_timezone = :utc
 
       ##
@@ -60,13 +78,25 @@ module ActiveRecord
       # ActiveRecord::Schema file which can be loaded into any database that
       # supports migrations. Use :ruby if you want to have different database
       # adapters for, e.g., your development and test environments.
-      delegate :schema_format, to: ActiveRecord::ApplicationModel.config
+      def self.schema_format
+        ActiveRecord::ApplicationModel.config.schema_format
+      end
+
+      def self.schema_format=(value)
+        ActiveRecord::ApplicationModel.config.schema_format = value
+      end
       self.schema_format = :ruby
 
       ##
       # :singleton-method:
       # Specify whether or not to use timestamps for migration versions
-      delegate :timestamped_migrations, to: ActiveRecord::ApplicationModel.config
+      def self.timestamped_migrations
+        ActiveRecord::ApplicationModel.config.timestamped_migrations
+      end
+
+      def self.timestamped_migrations=(value)
+        ActiveRecord::ApplicationModel.config.timestamped_migrations = value
+      end
       self.timestamped_migrations = true
 
       def self.disable_implicit_join_references=(value)

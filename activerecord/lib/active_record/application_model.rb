@@ -1,8 +1,5 @@
 module ActiveRecord
   module ApplicationModel
-    mattr_accessor :config
-    self.config = ModelConfiguration.new
-
     class ModelConfiguration
       attr_accessor :ordered_options
 
@@ -48,5 +45,8 @@ module ActiveRecord
           )
         end
     end
+
+    mattr_accessor :config
+    self.config = ModelConfiguration.new
   end
 end

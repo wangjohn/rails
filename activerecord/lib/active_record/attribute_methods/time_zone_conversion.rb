@@ -19,11 +19,19 @@ module ActiveRecord
       extend ActiveSupport::Concern
 
       included do
-        delegate :time_zone_aware_attributes, to: ActiveRecord::ApplicationModel.config
+        def self.time_zone_aware_attributes
+          ActiveRecord::ApplicationModel.config.time_zone_aware_attributes
+        end
+
+        def self.time_zone_aware_attributes=(value)
+          ActiveRecord::ApplicationModel.config.time_zone_aware_attributes = value
+        end
+
         self.time_zone_aware_attributes = false
 
         class_attribute :skip_time_zone_conversion_for_attributes, instance_writer: false, proc: true
-        self.skip_time_zone_conversion_for_attributes = lambda { ActiveRecord::ApplicationModel.config.skip_time_zone_conversion_for_attributes }
+        self.skip_time_zone_conversion_for_attributes =
+            lambda { ActiveRecord::ApplicationModel.config.skip_time_zone_conversion_for_attributes }
       end
 
       module ClassMethods

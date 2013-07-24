@@ -10,7 +10,13 @@ module ActiveRecord
       # the Product class will look for "productid" instead of "id" as the primary column. If the
       # latter is specified, the Product class will look for "product_id" instead of "id". Remember
       # that this is a global setting for all Active Records.
-      delegate :primary_key_prefix_type, to: ActiveRecord::ApplicationModel.config
+      def self.primary_key_prefix_type
+        ActiveRecord::ApplicationModel.config.primary_key_prefix_type
+      end
+
+      def self.primary_key_prefix_type=(value)
+        ActiveRecord::ApplicationModel.config.primary_key_prefix_type = value
+      end
 
       ##
       # :singleton-method:
