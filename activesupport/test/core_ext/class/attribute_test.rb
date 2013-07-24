@@ -5,6 +5,9 @@ class ClassAttributeTest < ActiveSupport::TestCase
   def setup
     @klass = Class.new { class_attribute :setting }
     @sub = Class.new(@klass)
+
+    @proc_klass = Class.new { class_attribute :setting, proc: true }
+    @proc_sub = Class.new(@proc_klass)
   end
 
   test 'defaults to nil' do
@@ -25,6 +28,18 @@ class ClassAttributeTest < ActiveSupport::TestCase
     assert_equal 1, @sub.setting
 
     assert_equal 1, Class.new(@sub).setting
+  end
+
+  test 'overridable with procs' do
+    sub_setting = 1
+    @proc_sub.setting = lambda { sub_setting }
+    assert_nil @proc_klass.setting
+
+    klass_setting = 2
+    @proc_klass.setting = lambda { klass_setting }
+    assert_equal 1, @proc_sub.setting
+
+    assert_equal 1, Class.new(@proc_sub).setting
   end
 
   test 'predicate method' do
@@ -76,6 +91,26 @@ class ClassAttributeTest < ActiveSupport::TestCase
   test 'disabling instance predicate' do
     object = Class.new { class_attribute :setting, instance_predicate: false }.new
     assert_raise(NoMethodError) { object.setting? }
+  end
+
+  test 'delegating class attribute with lambda on instance' do
+    object = Class.new { class_attribute :setting, proc: true }.new
+    real_setting = "5"
+    object.setting = lambda { real_setting }
+    assert_equal "5", object.setting
+
+    real_setting = "10"
+    assert_equal "10", object.setting
+  end
+
+  test 'delegating class attribute with lambda on singleton class' do
+    object = @proc_klass.new
+    setting = "5"
+    object.singleton_class.setting = lambda { setting }
+    assert_equal "5", object.setting
+
+    setting = "10"
+    assert_equal "10", object.setting
   end
 
   test 'works well with singleton classes' do

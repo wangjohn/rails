@@ -73,6 +73,7 @@ class Class
     instance_reader = options.fetch(:instance_accessor, true) && options.fetch(:instance_reader, true)
     instance_writer = options.fetch(:instance_accessor, true) && options.fetch(:instance_writer, true)
     instance_predicate = options.fetch(:instance_predicate, true)
+    using_proc = options.fetch(:proc, false)
 
     attrs.each do |name|
       define_singleton_method(name) { nil }
@@ -80,34 +81,67 @@ class Class
 
       ivar = "@#{name}"
 
-      define_singleton_method("#{name}=") do |val|
-        singleton_class.class_eval do
-          remove_possible_method(name)
-          define_method(name) { val }
-        end
-
-        if singleton_class?
-          class_eval do
+      if using_proc
+        define_singleton_method("#{name}=") do |val|
+          singleton_class.class_eval do
             remove_possible_method(name)
-            define_method(name) do
-              if instance_variable_defined? ivar
-                instance_variable_get ivar
-              else
-                singleton_class.send name
+            define_method(name) { val.call }
+          end
+
+          if singleton_class?
+            class_eval do
+              remove_possible_method(name)
+              define_method(name) do
+                if instance_variable_defined? ivar
+                  instance_variable_get(ivar).call
+                else
+                  singleton_class.send name
+                end
               end
             end
           end
+          val
         end
-        val
+      else
+        define_singleton_method("#{name}=") do |val|
+          singleton_class.class_eval do
+            remove_possible_method(name)
+            define_method(name) { val }
+          end
+
+          if singleton_class?
+            class_eval do
+              remove_possible_method(name)
+              define_method(name) do
+                if instance_variable_defined? ivar
+                  instance_variable_get ivar
+                else
+                  singleton_class.send name
+                end
+              end
+            end
+          end
+          val
+        end
       end
 
       if instance_reader
         remove_possible_method name
-        define_method(name) do
-          if instance_variable_defined?(ivar)
-            instance_variable_get ivar
-          else
-            self.class.public_send name
+        if using_proc
+          define_method(name) do
+            if instance_variable_defined?(ivar)
+              instance_variable_get(ivar).call
+            else
+              self.class.public_send name
+            end
+          end
+        else
+          define_method(name) do
+            if instance_variable_defined?(ivar)
+              instance_variable_get ivar
+            else
+              self.class.public_send name
+            end
           end
         end
         define_method("#{name}?") { !!public_send(name) } if instance_predicate
