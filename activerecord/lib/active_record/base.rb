@@ -291,6 +291,7 @@ module ActiveRecord #:nodoc:
     extend DynamicMatchers
     extend Explain
 
+    include ApplicationModel
     include Persistence
     include ReadonlyAttributes
     include ModelSchema

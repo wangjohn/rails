@@ -1,11 +1,11 @@
 module ActiveRecord
-  class ApplicationModel < ActiveRecord::Base
+  class ApplicationModel
     class << self
       attr_accessor :isolated
 
-      def configs_from(mod)
+      def configs_from(namespace)
         self.isolated = true
-        application_model_name = generate_application_model_name(mod)
+        application_model_name = generate_application_model_name(namespace)
 
         singleton_class.instance_eval do
           define_method(:application_model_namespace) { application_model_name }
@@ -14,8 +14,8 @@ module ActiveRecord
 
       private
 
-        def generate_application_model_name(mod)
-          ActiveSupport::Inflector.underscore(mod).tr("/", "_")
+        def generate_application_model_name(namespace)
+          ActiveSupport::Inflector.underscore(namespace).tr("/", "_")
         end
     end
   end

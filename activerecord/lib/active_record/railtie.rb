@@ -111,8 +111,13 @@ module ActiveRecord
 
     initializer "active_record.set_configs" do |app|
       ActiveSupport.on_load(:active_record) do
+        class BaseApplicationModel < ApplicationModel
+        end
+
+        ActiveRecord::Base.configs_from(BaseApplicationModel)
+
         app.config.active_record.each do |k,v|
-          send "#{k}=", v
+          send("#{k}=", v)
         end
       end
     end
