@@ -6,7 +6,7 @@ module ActiveRecord
   module Core
     extend ActiveSupport::Concern
 
-    included do
+    write_config! do
       ##
       # :singleton-method:
       #

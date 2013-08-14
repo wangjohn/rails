@@ -12,6 +12,12 @@ module ActiveRecord
         end
       end
 
+      def write_config!(&block)
+        application_model_namespace.singleton_class.instance_eval do
+          block.call
+        end
+      end
+
       private
 
         def generate_application_model_name(namespace)
