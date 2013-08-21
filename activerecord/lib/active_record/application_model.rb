@@ -1,7 +1,7 @@
 require 'active_record/base'
 
 module ActiveRecord
-  class ApplicationModel
+  class ApplicationModel < ActiveRecord::Base
     class << self
       attr_accessor :isolated
 
@@ -14,26 +14,26 @@ module ActiveRecord
         mod.define_singleton_method(:application_model) { application_model }
       end
 
-      def method_missing(name, *args, &block)
-        ActiveRecord::Base.send(name, *args, &block)
-      end
-
       def get_config(name, context = self)
-        if context.respond_to?(:application_model)
-          context.application_model.send(name)
-        else
-          ActiveRecord::Base.send(name)
-        end
+        mod = module_from_context(context)
+        mod.send(name)
       end
 
-      def respond_to?(name)
-        ActiveRecord::Base.respond_to?(name)
+      def set_config(name, value, context = self)
+        mod = module_from_context(context)
+        mod.send("#{name}=", value)
       end
 
       private
 
-        def generate_application_model_name(mod)
-          "#{mod}ApplicationModel"
+        def module_from_context(context)
+          if context.respond_to?(:application_model)
+            context.application_model
+          elsif (parent_match = context.class.parents.detect { |m| m.respond_to?(:application_model) })
+            parent_match.application_model
+          else
+            ActiveRecord::Base
+          end
         end
     end
   end
